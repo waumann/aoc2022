@@ -3,8 +3,7 @@ import Foundation
 var path = "input.day3.txt"
 
 let filedata = try String(contentsOfFile: path)
-let text: [String] = filedata.components(separatedBy: "\n")
-var data = text.map { String($0) }
+var data: [String] = filedata.components(separatedBy: "\n")
 data.remove(at: data.count-1)
 
 var c_to_i: [Character: Int] = [:]
@@ -27,7 +26,6 @@ var priorities = 0
 var lineptr = 0
 print("Line count = \(data.count)")
 while lineptr < data.count {
-  print("Reading from \(lineptr) to \(lineptr + 2)")
   let a = Set(Array(data[lineptr]))
   let b = Set(Array(data[lineptr+1]))
   let c = Set(Array(data[lineptr+2]))
