@@ -11,11 +11,15 @@ var c_to_i: [Character: Int] = [:]
 
 // a - z map to 1 - 26. A - Z map to 27 - 52.
 // For lower case, I wanted to say
-//      score = item.asciivalue() - Character('a').asciivalue() + 1
+//      score = item.asciiValue() - Character('a').asciiValue() + 1
 // ... and something similar for upper case, plus 26, but just could
 // not find an answer for converting Uint8 to Int that didn't seem to
 // involve dealing with int size and endianness of my system along with
 // the unwrapping.
+
+let item = Character("q")
+let test = item.asciiValue() - Character("a").asciiValue() + 1
+print(test)
 
 for i in 65...90 { // Upper case
   if let c = UnicodeScalar(i) {
@@ -45,13 +49,12 @@ data.forEach {
     let B = Set(allItems[midpoint...])
     let common = A.intersection(B)
     var score = 0
-    // What does it actually take to get this character unwrapped?
-    let item = common.first
-    if item != nil {
-      score = c_to_i[item]
+    if let item = common.first {
+      score = c_to_i[item] ?? 0
     } else {
       print("Got unexpected nil value")
     }
+    assert(score != 0)
     priorities += score
   }
 }
