@@ -32,11 +32,12 @@ def move(dir):
     if d_x != 0: t_x += d_x / abs(d_x)
     if d_y != 0: t_y += d_y / abs(d_y)
   visited.add("%d:%d" % (t_x, t_y))
-    
+
 
 def moveN(dir, num):
   for _ in range(0, int(num)):
     move(dir) 
+
 
 for line in all:
   l = line.strip()
