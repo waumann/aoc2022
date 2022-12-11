@@ -11,6 +11,7 @@ var data: [String] = trimmed.components(separatedBy: "\n")
 data.remove(at: data.count-1)
 
 var monkeys: [Monkey] = []
+public var common_factor = 1
 
 class Monkey: CustomStringConvertible {
   var id: Int
@@ -48,37 +49,38 @@ Monkey \(id):
       self.number = arg!
     }
     self.divisor = divisor
+    common_factor *= self.divisor
     self.iftrue = ifTrue
     self.iffalse = ifFalse
     self.objects = 0
   }
     
   func do_throws() {
-    print("Monkey \(self.id):")
+    //print("Monkey \(self.id):")
     self.items.forEach {
       self.objects += 1
       var worry = $0
-      print("  Monkey inspects an item wtih a worry level of \(worry).")
+      //print("  Monkey inspects an item wtih a worry level of \(worry).")
       if operation == "+" {
         worry += self.number
-        print("    Worry level increases by \(self.number) to \(worry).")
+        //print("    Worry level increases by \(self.number) to \(worry).")
       } else if operation == "*" {
         worry *= self.number
-        print("    Worry level is multiplied by \(self.number) to \(worry).")
+        //print("    Worry level is multiplied by \(self.number) to \(worry).")
       } else {
         worry *= $0
-        print("    Worry level is multiplied by itself to \(worry).")
+        //print("    Worry level is multiplied by itself to \(worry).")
       }
-      worry /= 3
-      print("    Monkey gets bored with item. Worry level is divided by 3 to \(worry).")
+      worry %= common_factor
+
       var target = -1
       if worry % self.divisor > 0 {
-        print("    Current worry level is not divisible by \(self.divisor).")
+        //print("    Current worry level is not divisible by \(self.divisor).")
         target = self.iffalse
       } else {
         target = self.iftrue
       }
-      print("Item with worry level \(worry) is thrown to monkey \(target).")
+      //print("Item with worry level \(worry) is thrown to monkey \(target).")
       monkeys[target].do_catch(worry)
     }
     self.items = []
@@ -132,14 +134,9 @@ data.forEach {
 monkeys.append(Monkey(id: id, items: items, op: operation, div: divisor,
   iftrue: iftrue, iffalse: iffalse))
 
-for i in 1...20 {
+for _ in 1...10000 {
   for m in 0..<monkeys.count {
     monkeys[m].do_throws()
-  }
-  print("== After round \(i) ==")
-  for m in 0..<monkeys.count {
-    // print("Monkey \(m) inpected items \(monkeys[m].objects) times.")
-    print("Monkey \(m): \(monkeys[m].items.map { String($0) }.joined(separator: ", "))")
   }
 }
 

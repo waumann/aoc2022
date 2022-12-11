@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 
-import os
+import math
+import mpmath as mp
+from mpmath import *
 
-with open("input.day11.test", "r") as f:
+with open("input.day11.txt", "r") as f:
   all = f.readlines()
 
 monkeys = []
+maxdiv = 1
 
 class Monkey:
   def __init__(self, id, items, operation, divisor, iftrue, iffalse):
@@ -26,6 +29,7 @@ class Monkey:
 
   def throw(self):
     global monkeys
+    global maxdiv
     for item in self.items:
       self.count += 1
       #print('Monkey inspects an item with a worry level of %d' % item)
@@ -36,14 +40,14 @@ class Monkey:
       else:
         worry = item * item
       #print('Worry level set to %d' % worry) 
-      new = worry // 3
-      #print('Monkey gets bored with item. Worry level drops to %d' % new)
-      if new % self.divisor > 0:
+      worry %= maxdiv
+      #print('Monkey gets bored with item. Worry level drops to %d' % worry)
+      if worry % self.divisor > 0:
         #print('Item thrown to monkey %d' % self.iffalse)
-        monkeys[self.iffalse].catch(new)
+        monkeys[self.iffalse].catch(worry)
       else:
         #print('Item thrown to monkey %d' % self.iftrue)
-        monkeys[self.iftrue].catch(new)
+        monkeys[self.iftrue].catch(worry)
     self.items = []
 
   def catch(self, worry):
@@ -51,7 +55,6 @@ class Monkey:
 
   def list(self):
     return ', '.join([str(x) for x in self.items])
-
 
 id = 0
 operation = ""
@@ -80,22 +83,29 @@ for line in all:
     monkeys.append(Monkey(id, items, operation, divisor, iftrue, iffalse))
 monkeys.append(Monkey(id, items, operation, divisor, iftrue, iffalse))
 
+maxdiv = 1
+for m in monkeys:
+  maxdiv *= (maxdiv * m.divisor) // math.gcd(maxdiv, m.divisor)
+
+print(maxdiv)
+
 index = 0
 round_num = 1
 while True:
-  #print('Index = %d' % index)
-  m = monkeys[index]
-  m.throw()
+  for i in range(0, len(monkeys)):
+    monkeys[i].throw()
 
-  index += 1
-  if index == len(monkeys):
-    #print('After round_num %d, the monkeys are holding items with these worry levels:' % round_num)
-    #for i in range(0, index):
-    #  print('Monkey %d: %s' % (i, monkeys[i].list()))
-    round_num += 1
-    index = 0
-    if round_num == 21:
-      break
+  #if round_num == 1 or round_num == 20 or round_num % 1000 == 0:
+  #  print('== After round %d ==' % round_num)
+  #  for i in range(0, len(monkeys)):
+  #    print('Monkey %d inspected items %d times.' % (i, monkeys[i].count))
+  #  print('After round_num %d, the monkeys are holding items with these worry levels:' % round_num)
+  #  for i in range(0, index):
+  #    print('Monkey %d: %s' % (i, monkeys[i].list()))
+  round_num += 1
+  index = 0
+  if round_num == 10001:
+    break
 
 
 vals = []
