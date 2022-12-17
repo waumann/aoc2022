@@ -48,13 +48,14 @@ def print_map():
   #  print()
   #print()
 
+#print_map()
+
 def add_sand(x, y):
   global mymap
   global min_x
   global max_x
   global max_y
 
-  print_map()
   while True: 
     if x-1 < min_x:
        #print("Pushing border left")
@@ -67,8 +68,11 @@ def add_sand(x, y):
     mymap.setdefault(x+1, dict())
     mymap[x+1][max_y] = "#"
 
+    for i in range(x-1, x+2):
+      mymap[i].setdefault(y+1, ".")
     #print("DEBUG: min_x = %d, max_x = %d, max_y = %d" % (min_x, max_x, max_y))
     #print("DEBUG: x = %d, y = %d" % (x, y))
+
     if mymap[x][y+1] != "." and mymap[x-1][y+1] != "." and mymap[x+1][y+1] != ".":
       break
     
@@ -85,9 +89,6 @@ def add_sand(x, y):
       x = x + 1
       y = y + 1
       continue
-
-  if y >= max_y:
-    return False
 
   if x == 500 and y == 0:
     return False
