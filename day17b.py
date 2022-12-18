@@ -82,7 +82,7 @@ def place_piece_in_cave(cave, piece_in_flight, height, left, use_char):
 #disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
 #print_cave(disp)
 count = 0
-while count < 2022:
+while count < 1000000000000:
   #print_cave(
   #   place_piece_in_cave(
   #       copy.deepcopy(cave), piece_in_flight, height, left, '@'))
@@ -111,6 +111,7 @@ while count < 2022:
     #print_cave(disp)
   else:
     count += 1
+    if count % 10000000000 == 0: print('Count = %d' % count)
     #print('Hit bottom! Total pieces = %d' % count)
     cave = place_piece_in_cave(cave, piece_in_flight, height, left, '#')
     #print_cave(cave)
