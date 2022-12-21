@@ -1,133 +1,136 @@
 #!/usr/bin/python3
 
-import copy
+import sys
 
-with open("input.day17.txt", "r") as f:
+with open("input.day17.test", "r") as f:
   all = f.readlines()
 
-pieces = [{
-  'width': 4,
-  'height': 1,
-  'text': ['####']
-}, {
-  'width': 3,
-  'height': 3,
-  'text': [' # ', '###', ' # ']
-}, {
-  'width': 3,
-  'height': 3,
-  'text': ['###', '  #', '  #']
-}, {
-  'width': 1,
-  'height': 4,
-  'text': ['#', '#', '#', '#']
-}, {
-  'width': 2,
-  'height': 2,
-  'text': ['##', '##']
-}]
+pieces = [ 0x000000f0, 0x0040e040, 0x002020e0, 0x80808080, 0x0000c0c0 ]
 
-empty = ['.', '.', '.', '.', '.', '.', '.']
-floor = ['#', '#', '#', '#', '#', '#', '#']
+width = [4, 3, 3, 1, 2]
+right_limit = [3, 4, 4, 6, 5]
+
+empty = 0b00000000
+floor = 0b01111111
 assert(len(all) == 1)
 input = all[0].strip()
 wind = 0
-cave = [floor, empty.copy(), empty.copy(), empty.copy(), empty.copy()]
+cave = bytearray(10)
+cave[0] = floor
 piece_in_flight = 0
 height = 4
 left = 2
 cave_height = 0
 
-def print_cave(cave):
-  c = cave.copy()
-  for i in range(0, len(c)):
-     c[i] = '%4d: |%s|' % (i, ''.join(c[i]))
-  bottom = c[0]
-  c.reverse()
-  max_print = 10
-  count = 0
-  for r in c:
-    print(r)
-    count += 1
-    if count >= max_print: break
-  print(bottom)
-  print(bottom)
+def write_cave(count):
+  f = open('b_%04d.txt' % count, 'w')
+  for l in range(len(cave)-1, -1, -1):
+    f.write('{0:4d}: |{1:08b}|\n'.format(l, cave[l]))
+  f.close()
+
+def print_cave():
+  for l in range(len(cave)-1, -1, -1):
+    print('{0:4d}: |{1:07b}|'.format(l, cave[l]))
 
 def check_collision(cave, piece_id, ht, left):
-  for piece_h in range(0, pieces[piece_id]['height']):
-    for piece_x in range(0, pieces[piece_id]['width']):
-      if pieces[piece_id]['text'][piece_h][piece_x] == "#":
-        #print('DEBUG: height goes to %d' % len(cave))
-        #print('DEBUG: height = %d, piece_h = %d, index = %d' % (ht, piece_h, ht + piece_h - 1))
-        #print('DEBUG: left = %d, piece_x = %d' % (left, piece_x))
-        #print('CAVE: %s' % cave[ht+piece_h])
-        y = ht + piece_h
-        x = left + piece_x
-        #print('DEBUG: Checking (%d, %d)' % (x, y))
-        if cave[y][x] == "#":
-          #print('Collision at (%d, %d)' % (x, y))
-          return True
-  return False
+  cave_map = ((((cave[ht+3] << 8 | cave[ht+2]) << 8) | cave[ht+1]) << 8) | cave[ht+0]
+  # cave_map = int.from_bytes(cave_bytes, 'little')
+  #print('Height: %d' % ht)
+  #print('Cave map value: {0:032b}'.format(cave_map))
+  rock_map = pieces[piece_id] >> left+1
+  #print('Rock map value: {0:032b}'.format(rock_map))
+  check = cave_map & rock_map
+  #print('DEBUG: Check = %d' % check)
+  return check != 0
 
-def place_piece_in_cave(cave, piece_in_flight, height, left, use_char):
-  for piece_h in range(0, pieces[piece_in_flight]['height']):
-    for piece_x in range(0, len(pieces[piece_in_flight]['text'][piece_h])):
-      if pieces[piece_in_flight]['text'][piece_h][piece_x] == '#':
-        assert(cave[height+piece_h][left+piece_x] == '.')
-        cave_alt = height + piece_h
-        cave[cave_alt][left + piece_x] = use_char
-  return(cave)
+def place_piece_in_cave(piece_id, ht, left):
+  global cave
+  #for i in range(0, 4):
+  #  print('Cave {0}: {1:b}'.format(i, cave[i]))
+  cave_map = ((((cave[ht+3] << 8 | cave[ht+2]) << 8) | cave[ht+1]) << 8) | cave[ht+0]
+  #print('Cave map value: %d' % cave_map)
+  rock_map = pieces[piece_id] >> left+1
+  #print('Rock map value: %d' % rock_map)
+  check = cave_map | rock_map
+  #print('DEBUG: Check = %d' % check)
+  hiq = (check & 0xff000000) >> 24
+  hlq = (check & 0x00ff0000) >> 16
+  lhq = (check & 0x0000ff00) >> 8
+  loq = (check & 0x000000ff)
+  cave[ht] = loq
+  cave[ht+1] = lhq
+  cave[ht+2] = hlq
+  cave[ht+3] = hiq
+
+def repeater(s):
+  i = (s+s)[1:-1].find(s)
+  if i == -1:
+    return s
+  else:
+    return s[:i+1]
+
+def has_cycle():
+  # if len(cave) <= 5000: return False
+  cavestr = cave.decode('utf-8')
+  test_string = cavestr[-100:]
+  length = len(cavestr)
+  start = length - 100
+  first_match = cavestr.find(test_string)
+  print('Estimated start = %d' % start)
+  print('First match = %d' % first_match)
+  if abs(first_match - start) < 3: return False
+  print('Computed repeat length = %d' % (start - first_match))
+  sys.exit(0)
+  #out = repeater(test_string)
+  #print('Test: input length = %d' % len(test_string))
+  #print('Test: output length = %d' % len(out))
+  #if len(test_string) == len(out): return False
+  #return len(test_string) - len(out) < len(out)
 
 
-#disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
-#print_cave(disp)
 count = 0
-while count < 1000000000000:
-  #print_cave(
-  #   place_piece_in_cave(
-  #       copy.deepcopy(cave), piece_in_flight, height, left, '@'))
+while count < 10000000000000:
   wind_dir = input[wind]
-  #print('Wind: %s' % wind_dir)
   test_left = -1
   if wind_dir == '<':
     test_left = max(0, left - 1)
   else:
-    test_left = min(left + 1, 7 - pieces[piece_in_flight]['width'])
+    test_left = min(left + 1, right_limit[piece_in_flight])
   assert(test_left != -1)
   if not check_collision(cave, piece_in_flight, height, test_left):
     left = test_left
-  #print('Wind index was %d' % wind)
+  #print('Wind = %d, Left = %d' % (wind, left))
   wind += 1
   wind %= len(input)
-  #print('Wind index is now %d (%d)' % (wind, len(input)))
-  #disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
-  #print_cave(disp)
 
-  #print('Drop:')
   test_height = height - 1
   if not check_collision(cave, piece_in_flight, test_height, left):
     height = test_height
-    #disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
-    #print_cave(disp)
+    #print('New height = %d' % height)
   else:
     count += 1
-    if count % 10000000000 == 0: print('Count = %d' % count)
-    #print('Hit bottom! Total pieces = %d' % count)
-    cave = place_piece_in_cave(cave, piece_in_flight, height, left, '#')
-    #print_cave(cave)
+    place_piece_in_cave(piece_in_flight, height, left)
+    #print_cave()
+    if count % 10000 == 0:
+      if has_cycle(): break
     
     piece_in_flight += 1
     piece_in_flight %= len(pieces)
+
     height = len(cave) - 1
     while cave[height] == empty:
       height -= 1
     height += 4 
     left = 2
-    while len(cave) <= height+pieces[piece_in_flight]['height']:
-      cave.append(empty.copy())
-    #print('New piece!')
-    #disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
-    #print_cave(disp)
+    while len(cave) <= height+4:
+      cave.append(empty)
 
+    
 
-print_cave(cave)
+#print_cave(cave)
+h = len(cave)
+while h >=0:
+  h -= 1
+  if cave[h] != 0:
+    print('Height is %d' % h)
+    break

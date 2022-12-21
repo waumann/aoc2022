@@ -32,26 +32,20 @@ floor = ['#', '#', '#', '#', '#', '#', '#']
 assert(len(all) == 1)
 input = all[0].strip()
 wind = 0
-cave = [floor, empty.copy(), empty.copy(), empty.copy(), empty.copy()]
+cave = [floor, empty.copy(), empty.copy(), empty.copy(), empty.copy(), empty.copy(), empty.copy(), empty.copy(), empty.copy(), empty.copy()]
 piece_in_flight = 0
 height = 4
 left = 2
 cave_height = 0
 
-def print_cave(cave):
-  c = cave.copy()
-  for i in range(0, len(c)):
-     c[i] = '%4d: |%s|' % (i, ''.join(c[i]))
-  bottom = c[0]
-  c.reverse()
-  max_print = 10
-  count = 0
-  for r in c:
-    print(r)
-    count += 1
-    if count >= max_print: break
-  print(bottom)
-  print(bottom)
+def print_cave(count):
+  f = open('a_%04d.txt' % count, 'w')
+  for l in range(len(cave)-1, -1, -1):
+    out = ''.join(cave[l])
+    out = out.replace('.', '0')
+    out = out.replace('#', '1')
+    f.write('{0:4d}: |{1:s}0|\n'.format(l, out))
+  f.close()
 
 def check_collision(cave, piece_id, ht, left):
   for piece_h in range(0, pieces[piece_id]['height']):
@@ -97,6 +91,7 @@ while count < 2022:
   if not check_collision(cave, piece_in_flight, height, test_left):
     left = test_left
   #print('Wind index was %d' % wind)
+  #print('Wind = %d, Left = %d' % (wind, left))
   wind += 1
   wind %= len(input)
   #print('Wind index is now %d (%d)' % (wind, len(input)))
@@ -109,11 +104,13 @@ while count < 2022:
     height = test_height
     #disp = place_piece_in_cave(copy.deepcopy(cave), piece_in_flight, height, left, '@')
     #print_cave(disp)
+    #print('New height = %d' % height)
   else:
     count += 1
+    #print('Piece placed!')
     #print('Hit bottom! Total pieces = %d' % count)
     cave = place_piece_in_cave(cave, piece_in_flight, height, left, '#')
-    #print_cave(cave)
+    #print_cave(count)
     
     piece_in_flight += 1
     piece_in_flight %= len(pieces)
@@ -129,4 +126,10 @@ while count < 2022:
     #print_cave(disp)
 
 
-print_cave(cave)
+#print_cave(cave)
+h = len(cave)
+while h >=0:
+  h -= 1
+  if cave[h] != empty:
+    print('Height is %d' % h)
+    break
