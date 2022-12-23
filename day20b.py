@@ -2,50 +2,29 @@
 
 import sys
 
-with open("input.day20.test", "r") as f:
-  all = f.readlines()
+out = [int(x) * 811589153 for x in open('input.day20.test')]
+order = out.copy()
 
-orig = []
-out = []
+length = len(out)
 
-for line in all:
-  l = int(line.strip()) * 811589153
-  orig.append(l)
-  out.append(l)
-
-length = len(orig) - 1
-
-def move_positive(input, value):
+def move(input, value):
+  if value == 0: return input
   work = input.copy()
   loc = input.index(value)
-  offset = value % length
-  if loc > 0:
-    work = work[loc:] + work[:loc]
-  assert(work[0] == value)
-  return work[1:offset+1] + [value] + work[offset+1:]
+  keep = work.pop(loc)
+  work.insert((loc + keep) % length, keep)
+  return work
 
-def move_negative(input, value):
-  work = input.copy()
-  loc = input.index(value)
-  offset = value % length
-  if loc < length:
-    work = work[loc+1:] + work[0:loc+1]
-  assert(work[length] == value)
-  return work[:offset-1] + [i] + work[offset-1:length]
+print(out)
 
-
-for count in range(0, 10):
-  for i in orig:
-    offset = i % len(out)
-    if i > 0:
-      out = move_positive(out, i)
-    elif i < 0:
-      out = move_negative(out, i)
-    else:
-      pass
-    oo = out.copy()
-  front = oo.index(0)
-  print('XRound %d: %s' % (count, oo[front:] + oo[:front]))
+for _ in range(10):
+  for i in order:
+    out = move(out, i)
+    #pos = out.index(0)
+    #out = out[pos:] + out[:pos]
+    #for x in out: print(x)
+    #print('============')
+  #sys.exit(0)
 
 # print('Final = %s' % out)
 start = out.index(0)
@@ -59,3 +38,4 @@ print('Coordinate = %d + %d + %d = %d' % (out[i1], out[i2], out[i3], out[i1] + o
 
 print('Not -15593062415802')
 print('Not 5871847521955')
+print('Not 5968426631162 is too high')

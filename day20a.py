@@ -42,7 +42,6 @@ for i in orig:
   #print('Count = %d, value = %d' % (count, i))
   offset = i % len(out)
   loc = out.index(i)
-  newloc = loc + offset % length 
   if i > 0:
     out = move_positive(out, i)
   elif i < 0:
