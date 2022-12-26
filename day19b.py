@@ -12,7 +12,9 @@ CLAY = 1
 OBS = 2
 GEODE = 3
 
-compounded = [None] * 24
+TIME = 32
+
+compounded = [None] * TIME
 
 robot_name = {
   0: 'ore-collecting',
@@ -38,7 +40,7 @@ build_letter = {
 compounded[0] = 0
 robots = 0
 resources = 0
-for i in range(24):
+for i in range(TIME):
   resources += robots
   robots += 1
   compounded[i] = resources
@@ -83,8 +85,8 @@ class Blueprint:
 
   def run_plan(self, time_in, resources_in, robots_in, build_num, builds, best_so_far):
     best_so_far = max(resources_in[3], best_so_far)
-    geodes_from_existing_robots = (25 - time_in) * robots_in[3]
-    #if geodes_from_existing_robots + compounded[24 - time_in] < best_so_far:
+    geodes_from_existing_robots = (TIME + 1 - time_in) * robots_in[3]
+    #if geodes_from_existing_robots + compounded[TIME - time_in] < best_so_far:
     #  return geodes
     for rtype in range(3, -1, -1):
       robots = robots_in.copy()
@@ -97,10 +99,10 @@ class Blueprint:
         continue
       time_needed = self.time_needed(rtype, resources, robots)
       # Fast forward by time_needed, plus one to do the build
-      if time_t + time_needed + 1 > 24:
+      if time_t + time_needed + 1 > TIME:
         if robots[3] == 0:
           continue
-        while time_t < 25:
+        while time_t < TIME + 1:
           resources = self.collect(resources, robots)
           time_t += 1
         best_so_far = max(best_so_far, resources[3])
@@ -132,12 +134,12 @@ for line in all:
   plan = Blueprint(plan_id, ore_robot, clay_robot, obs_robot_ore, obs_robot_clay, geode_robot_ore, geode_robot_obs)
   plans.append(plan)
 
-quality = 0
+product = 1
 for plan in plans:
   plan_id = plan.id
+  if plan_id > 3: break
   best = plan.run_plan(1, [0, 0, 0, 0], [1, 0, 0, 0], 1, '', 0)
   print('Plan %d best = %d' % (plan_id, best))
-  quality += best * plan_id
+  product *= best
 
-print('Total quality is %d' % quality)
-print('1661 is too low')
+print('Product is %d' % product)
